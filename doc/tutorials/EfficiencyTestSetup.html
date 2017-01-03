@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Effizienzmessungen: Einführung</title>
+		<link rel="stylesheet" href="tutorials.css" />
+	</head>
+	<body>
+		<h1>Effizienzmessungen: Einführung</h1>
+
+		<p>
+			Nachdem Alice Herr Bobs Aufgaben gelöst hat, möchte sie die Performanz der Sortieralgorithmen vergleichen.
+		</p>
+
+		<p>
+			Hier sind nochmal die beiden Algorithmen:
+
+		<pre><code>	public static void bubbleSort(int[] arr) {
+		for (int i = 1; i &lt; arr.length; ++i) {
+			for (int j = 0; j &lt; arr.length - i; ++j) {
+				if (arr[j] > arr[j + 1]) {
+					swap(arr, j, j + 1);
+				}
+			}
+		}
+	}
+	
+	public static void selectionSort(int[] arr) {
+		for (int i = 0; i &lt; arr.length - 1; ++i) {
+			int min = i;
+			
+			for (int j = i + 1; j &lt; arr.length; ++j) {
+				if (arr[j] &lt; arr[min]) {
+					min = j;
+				}
+			}
+			
+			swap(arr, i, min);
+		}
+	}</code></pre>
+		</p>
+
+		<p>
+			Neben der Laufzeit und dem Speicherverbrauch, welche durch VisualJ automatisch gemessen werden können, will Alice wissen, wie oft in den beiden Algorithmen die innerste Schleife durchlaufen wird. Hierzu benutzt sie den Schrittzähler:
+
+		<pre><code>	public static void bubbleSort(int[] arr) {
+		for (int i = 1; i &lt; arr.length; ++i) {
+			for (int j = 0; j &lt; arr.length - i; ++j) {
+				if (arr[j] > arr[j + 1]) {
+					swap(arr, j, j + 1);
+				}
+				
+*1              StepCounter.step();
+			}
+		}
+	}
+	
+	public static void selectionSort(int[] arr) {
+		for (int i = 0; i &lt; arr.length - 1; ++i) {
+			int min = i;
+			
+			for (int j = i + 1; j &lt; arr.length; ++j) {
+				if (arr[j] &lt; arr[min]) {
+					min = j;
+				}
+				
+*1              StepCounter.step();
+			}
+			
+			swap(arr, i, min);
+		}
+	}</code></pre> 
+		</p>
+
+		<p>
+			Alles, was Alice tun muss, ist, den Zähler bei jedem Schleifendurchlauf um 1 nach oben zählen zu lassen (*1).
+		</p>
+		<p>
+			Die Anzahl der Schritte wird dann bei der Effizienzmessung ebenso wie die Laufzeit und der Speicherverbrauch gespeichert.
+		</p>
+	</body>
+</html>

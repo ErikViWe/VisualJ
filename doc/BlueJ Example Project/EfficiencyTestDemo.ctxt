@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.params=arr
+comment0.target=void\ bubbleSort(int[])
+comment1.params=arr
+comment1.target=void\ selectionSort(int[])
+comment2.params=arr
+comment2.target=void\ bogoSort(int[])
+comment3.params=arr
+comment3.target=boolean\ isSorted(int[])
+comment4.params=arr
+comment4.target=void\ shuffle(int[])
+comment5.params=arr\ i\ j
+comment5.target=void\ swap(int[],\ int,\ int)
+numComments=6

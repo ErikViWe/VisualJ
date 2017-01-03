@@ -1,0 +1,118 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Logger &amp; Visualizer: Fortgeschritten</title>
+		<link rel="stylesheet" href="tutorials.css" />
+	</head>
+	<body>
+		<h1>Logger &amp; Visualizer: Fortgeschritten</h1>
+		<p>Alice hat von ihrem Lehrer Herr Bob eine weitere, anspruchsvollere Aufgabe bekommen: nämlich Heap sort zu implementieren und ihren Klassenkameraden zu erklären.</p>
+		<p>Der Heap-Sort-Algorithmus sieht folgendermaßen aus:
+			<pre><code>	public static void heapSort(int[] arr) {
+		for (int i = (arr.length / 2) - 1; i >= 0; i--) {
+			siftDown(arr, i, arr.length, log);
+		}
+		
+		for (int i = arr.length - 1; i > 0; i--) {
+			swap(arr, i, 0);
+				siftDown(arr, 0, i);
+		}
+	}
+
+	private static void siftDown(int[] arr, int i, int n) {
+		while (i &lt;= (n / 2) - 1) {
+			int childIndex = ((i + 1) * 2) - 1;
+			
+			if (childIndex + 1 &lt;= n - 1) {
+				if (arr[childIndex] &lt; arr[childIndex + 1]) {
+					childIndex++;
+				}
+			}
+			
+			if (arr[i] &lt; arr[childIndex]) {
+				swap(arr, i, childIndex);
+				i = childIndex;
+			} else {
+				break;
+			}
+		}
+	}</code></pre>
+		</p>
+
+		<p>Bei Heap sort wird das zu sortierende Array als impliziter Baum behandelt. Der Knoten mit dem Index i hat hierbei bis zu zwei Kindknoten 2i+1 und 2i+2:</p>
+
+		<p style="font-size: 0.8em">
+			<img src="img/implicit_heap.png" alt="https://en.wikipedia.org/wiki/File:Binary_tree_in_array.svg"><br>
+
+			Bildquelle: <a href="https://en.wikipedia.org/wiki/File:Binary_tree_in_array.svg">Wikipedia</a>
+		</p>
+
+		<p>Deshalb will Alice diesmal das Array zweifach darstellen: Einmal wie vorher als einfache Zahlenfolge und einmal als binären Baum:
+
+			<pre><code>	public static void heapSort(int[] arr) {
+		Breakpoints.reset();
+		Window win = new Window();
+		
+		IntArrayLogger log = new IntArrayLogger(arr);
+		win.addVisualizer(log);
+*1		win.addVisualizer(new ImplicitHeapVisualizer(log));
+		win.setVisible(true);
+		Breakpoints.breakpoint();
+		
+		for (int i = (arr.length / 2) - 1; i >= 0; i--) {
+			siftDown(arr, i, arr.length, log);
+		}
+		
+		for (int i = arr.length - 1; i > 0; i--) {
+			swap(arr, i, 0);
+			siftDown(arr, 0, i, log);
+
+*2			log.update(arr);
+*4			Breakpoints.breakpoint(0);
+		}
+	}
+		
+	private static void siftDown(int[] arr, int i, int n, IntArrayLogger log) {
+		while (i &lt;= (n / 2) - 1) {
+			int childIndex = ((i + 1) * 2) - 1;
+			
+			if (childIndex + 1 &lt;= n - 1) {
+				if (arr[childIndex] &lt; arr[childIndex + 1]) {
+					childIndex++;
+				}
+			}
+			
+			if (arr[i] &lt; arr[childIndex]) {
+				swap(arr, i, childIndex);
+				i = childIndex;
+			} else {
+				break;
+			}
+			
+*3			log.update(arr);
+*4			Breakpoints.breakpoint(1);
+		}
+	}</code></pre>
+		</p>
+		<p>
+			Hierzu fügt sie dem Fenster einfach einen weiteren Visualizer, nämlich den ImplicitHeapVisualizer hinzu (*1).
+		</p>
+		<p>
+			Übergibt man dem Fenster einfach einen Logger, wie in der Zeile darüber, wird der Standardvisualizer des Loggers verwendet. Das ist bei allen ArrayLoggern der ArrayVisualier, der das Array als einfache Zahlenfolge darstellt.
+		</p>
+		<p>
+			Man aber auch, wie hier, einen eigenen Visualizer erstellen und diesen übergeben.
+		</p>
+		<p>
+			Das war schon alles. Wieder kann Alice wie vorher nach jedem Schritt des Algorithmus den Wert im Logger updaten und einen Breakpoint setzen (*2 &amp; *3).
+		</p>
+		<p>
+			Ein weiteres Feature von VisualJ sind Breakpoint-Levels (*4). Wenn Alice das Programm in gröberen Schritten durchgehen und die Breakpoints mit Level 1 überspringen will, kann sie im Fenster das maxBlockingLevel auf 0 setzen. Will sie das Programm in kleinere Schritte unterteilen, setzt sie das maxBlockingLevel auf 1.
+		</p>
+		<p>
+			<img src="img/ImplicitHeapVisualizer.png" alt="ImplicitHeapVisualizer"> <br>
+			Wie man sieht, wird das Array oben als Zahlenfolge und darunter als impliziter Heap dargestellt. Alles andere funktioniert wie gehabt: man kann das Programm von alleine laufen lassen oder Schritt für Schritt durchgehen.
+		</p>
+	</body>
+</html>

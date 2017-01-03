@@ -1,0 +1,947 @@
+\documentclass[a4paper]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage{enumerate}
+\usepackage{hyperref}
+\usepackage{xstring}
+\usepackage{minitoc}
+\usepackage{float}
+\usepackage{seqsplit}
+
+\usepackage[a4paper, total={15cm, 22cm}]{geometry}
+
+\usepackage{titlesec}
+\titleformat{\chapter}
+  {\normalfont\LARGE\bfseries}{\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+
+\ifx\pdftexversion\undefined
+\usepackage[dvips]{graphicx}
+\else
+\usepackage[pdftex]{graphicx}
+\DeclareGraphicsRule{*}{mps}{*}{}
+\fi
+
+% Kein Seitenumbruch zwischen Kapiteln
+%\usepackage{etoolbox}
+%\makeatletter
+%\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+
+\title{Implementierungsbericht -- VisualJ}
+\author{Mehdi Dado\\Florian Lanzinger\\Robin Schulz\\Tobias Stickling\\Erik Weinstock\\ \\
+Betreuer:\\Erik Burger\\Dominik Werle}
+\date{17.07.2016}
+
+\begin{document}
+% Initialisiere minitoc (für Funktionsübersicht)
+\dominitoc
+
+\maketitle
+\setcounter{tocdepth}{1}
+\tableofcontents
+\newpage
+
+\chapter{Einleitung}
+
+\section{Zielbestimmung und Produkteinsatz}
+
+VisualJ dient zur Visualisierung von Programmabläufen, insbesondere bezüglich der Datenstrukturen, sowie der Effizienzbetrachtung (und des Effizienzvergleichs) von Algorithmen. 
+
+Da VisualJ sich unter Anderem an Schüler richtet, liegt der Fokus hierbei auf der einfachen Benutzbarkeit.
+
+\section{Aufbau}
+
+VisualJ teilt sich in zwei separate Projekte: Zum Einen eine Bibliothek, die alle nötigen Klassen Methoden zur Visualisierung von Datenstrukturen und Algorithmen und zur Effizienzmessung in einer öffentlichen API zur Verfügung stellt und zum Anderen ein BlueJ-Plugin, welches in der BlueJ-Umgebung eine -- gegenüber der API für Schüler vereinfachte -- GUI für die Effizienzmessung zur Verfügung stellt. Die Visualisierung von Datenstrukturen geschieht auch in BlueJ nur über die API.
+
+Die Bibliothek baut auf dem Model-View-Controller-Architekturmuster auf. Hierbei enthält das Model die zu visualisierenden Datenstrukturen und Testdaten für die Effizienzmessung und der View die Klassen zur Visualisierung derselben. Teile des Controllers, wie z.B. \emph{ActionListener} und andere Klassen für den Umgang mit Benutzereingaben, sind mit dem View, andere, wie die Kontrollflusssteuerung mit dem Model zusamengefasst.
+
+\chapter{Installationsanweisung}
+Um die Erweiterungen zu installieren, muss \emph{VisualJ 1.0.zip} zuerst dekomprimiert werden. Nach der Dekomprimierung sind 3 Ordner zu finden:\emph{VisualJ-Win}, \emph{VisualJ-Linux} und \emph{VisualJ-Mac}. Auf Windows- bzw. Linux-Rechnern muss jeweils \emph{VisualJ-Win} bzw. \emph{VisualJ-Linux} geöffnet und der Ordner \emph{lib} in das Verzeichnis \emph{<BLUEJ\_HOME>} verschoben werden. Unter Linux muss man im Dialogfenster \emph{Dateikonflikt} auf \emph{Zusammenführen} klicken. \emph{<BLUEJ\_HOME>} ist das Verzeichnis, in dem BlueJ installiert ist.
+
+Im Ordner \emph{VisualJ-Mac} sind 2 JAR-Dateien (\emph{VisualJ BlueJ.jar} und \emph{VisualJ Bibliothek.jar}) zu finden. Auf Mac OS X muss man mit der rechten Maustaste auf \emph{BlueJ.app} klicken und \emph{Paketinhalt zeigen} wählen. Zunächst navigiert man im zuvor geöffneten Fenster zu \emph{\seqsplit{Contents/Resources/Java/extensions}} und verschiebt \emph{VisualJ BlueJ.jar} in den Ordner \emph{extensions}. Nun navigiert man zu \emph{\seqsplit{Contents/Resources/Java/userlib}} und verschiebt \emph{VisualJ Bibliothek.jar} in den Ordner \emph{userlib}. (Hinweis: Es ist wichtig, dass während der Installation der Erweiterung BlueJ nicht ausgeführt wird. Ansonsten ist ein Neustart von BlueJ erforderlich.)
+\\\\
+\renewcommand{\arraystretch}{1.3}
+Erweiterung:\\\\
+\begin{tabular}{|p{11.7cm}|p{2.3cm}|}
+  \hline
+{Ort} & Betriebssystem\\
+  \hline
+{<BLUEJ\_HOME>/lib/extensions} & {Linux}\\
+  \hline
+{<BLUEJ\_HOME>\textbackslash lib\textbackslash extensions} & {Windows}\\
+  \hline
+{<BLUEJ\_HOME>/BlueJ.app/Contents/Resources/Java/extensions} & \multirow{1}{*} {Mac}\\
+  \hline
+\end{tabular}
+\\\\\\
+Bibliothek:\\\\
+\begin{tabular}{|p{11.7cm}|p{2.3cm}|}
+  \hline
+{Ort} & Betriebssystem\\
+  \hline
+{<BLUEJ\_HOME>/lib/userlib} & {Linux}\\
+  \hline
+{<BLUEJ\_HOME>\textbackslash lib\textbackslash userlib} & {Windows}\\
+  \hline
+{<BLUEJ\_HOME>/BlueJ.app/Contents/Resources/Java/userlib} & \multirow{1}{*} {Mac}\\
+  \hline
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+\paragraph{Quelle:} \url{http://www.bluej.org/extensions/extensions.html}
+
+\chapter{Verwendete Bibliotheken}
+
+\section{Swing}
+\paragraph{Version:} JDK 8 \\
+\paragraph{Zweck:} Grafische Oberflächen. Es wird Swing statt JavaFX verwendet, da ersteres etablierter und mit mehr anderen Bibliotheken, unter anderem mit denen, die wir einbinden, kompatibel ist. Auch BlueJ (und damit das \emph{BlueJ Extensions Framework}) verwendet Swing.
+
+\section{BlueJ}
+\paragraph{Version:} BlueJ 3.1.7 \\
+\paragraph{JAR-Dateien:}
+	\begin{itemize}
+	\item bluejext.jar\\
+\end{itemize}
+
+\section{Apache Commons Lang}
+\paragraph{Version:} Apache Commons Lang 3.4 \\
+\paragraph{Zweck:} Utility-Bibliothek. \\
+\paragraph{JAR-Dateien:}
+	\begin{itemize}
+	\item commons-lang3-3.4.jar
+	\end{itemize}
+\paragraph{Quelle:} \url{https://commons.apache.org/proper/commons-lang/}\\
+
+\section{JFreeChart}
+\paragraph{Version:} JFreeChart 1.5.0 \\
+\paragraph{Zweck:} Bibliothek für Balkendiagramme und Funktionsgraphen. \\
+\paragraph{JAR-Dateien:}
+	\begin{itemize}
+	\item jfreechart-1.5.0-SNAPSHOT.jar
+	\item fxgraphics2d-1.3.jar
+	\item hamcrest-core-1.3.jar
+	\item jcommon-1.0.23.jar
+	\item jfreesvg-3.0.jar
+	\item orsonpdf-1.7.jar
+	\item servlet.jar
+	\end{itemize}
+\paragraph{Quelle:} \url{http://www.jfree.org/jfreechart/}\\
+
+\section{JUNG}
+\paragraph{Version:} JUNG 2.0.1 \\
+\paragraph{Zweck:} Bibliothek für Bäume (und Graphen) und deren Visualisierung. \\
+\paragraph{JAR-Dateien:}
+		\begin{itemize}
+		\itemsep -10pt
+		\item collections-generic-4.01.jar\\
+		\item colt-1.2.0.jar\\
+		\item concurrent-1.3.4.jar\\
+		\item j3d-core-1.3.1.jar\\
+		\item jung-3d-2.0.1.jar\\
+		\item jung-3d-demos-2.0.1.jar\\
+		\item jung-algorithms-2.0.1.jar\\
+		\item jung-api-2.0.1.jar\\
+		\item jung-graph-impl-2.0.1.jar\\
+		\item jung-io-2.0.1.jar\\
+		\item jung-jai-2.0.1.jar\\
+		\item jung-jai-samples-2.0.1.jar\\
+		\item jung-samples-2.0.1.jar\\
+		\item jung-visualization-2.0.1.jar\\
+		\item stax-api-1.0.1.jar\\
+		\item vecmath-1.3.1.jar\\
+		\item wstx-asl-3.2.6.jar\\
+		\end{itemize}
+\paragraph{Quelle:} \url{http://jung.sourceforge.net}\\
+
+\chapter{Änderungen am Entwurf}
+
+\section{Entfernte Klassen}
+
+\subsection{visualj.util.ArrayUtils}
+
+Stattdessen wird die gleichnamige Klasse der \emph{Apache Commons}-Bibliothek verwendet, welche (unter anderem) dieselben Methoden zur Verfügung stellt.
+
+\section{Neue Klassen}
+
+\subsection{visualjplugin.efficiency.GeneratorPane}
+
+Diese Klasse dient als Oberklasse für alle Panels des Zeitmessungs-Eingabefensters, die die Eingabefelder beinhalten, also z.B. \emph{TupleGeneratorArrayPane}, etc.
+
+\subsection{visualjplugin.efficiency.Messages}
+
+Eine statische Klasse für das Laden von lokalisierten Strings.
+
+\subsection{visualj.datavis.logger.DeepCloneable}
+
+Ein Interface ähnlich dem \emph{Cloneable}-Interface der Java-Bibliothek, mit dem Unterschied, dass \emph{DeepCloneable} sicherstellt, dass implementierende Klassen eine öffentliche \emph{clone}-Methode bereitstellen.
+
+\subsection{visualj.datavis.logger.DeepCloneableLogger}
+
+Eine Logger-Unterklasse für Objekte von Klassen, die \emph{DeepCloneable} implementieren.
+
+\subsection{visualj.datavis.logger.CustomCloneLogger}
+
+Eine Logger-Unterklasse für beliebige Objekte, welcher eine eigene Lambda-Methode zum Klonen übergeben werden kann.
+
+\subsection{visualj.datavis.logger.GraphLogger}
+
+Ein Logger für Objekte von Klassen, die das \emph{Graph}-Interface der JUNG-Bibliothek implementieren.
+
+\subsection{visualj.datavis.logger.MapLogger}
+
+Ein Logger für Maps.
+
+\subsection{visualj.datavis.visualizer.GraphVisualizer}
+
+Ein Visualizer für Objekte von Klassen, die das \emph{Graph}-Interface der JUNG-Bibliothek implementieren, passend zu \emph{GraphLogger}.
+
+\subsection{visualj.datavis.visualizer.MapVisualizer}
+
+Ein Visualizer für Maps, passend zu \emph{MapLogger}.
+
+\subsection{visualj.datavis.visualizer.TreeRenderer}
+
+Ein eigener Renderer für Bäume, der die Knoten korrekt positioniert.
+
+\subsection{visualj.datavis.visualizer.VertexRenderer}
+
+Ein eigener Renderer für Knoten in JUNG-Graphen, der die Namen von Knoten in den Knoten anzeigt und die Größe der Knoten entsprechend anpasst.
+
+\subsection{visualj.efficiency.measure.NoDefaultConstructorException}
+
+Diese Exception wird von Methoden des Pakets geworfen, wenn für eine nicht-statische Methode kein Objekt angegeben wird, auf der sie ausgeführt werden soll, und die Klasse keinen öffentlichen Default-Konstruktor besitzt, mit dem ein solches Objekt erstellt werden könnte.
+
+\subsection{visualj.util.DimensionUtils}
+
+Diese Klasse enthält statische Methoden, die auf \emph{Dimension}-Objekten arbeiten.
+
+\subsection{visualj.util.ReflectionUtils}
+
+Diese Klasse enthält statische Methoden, die auf Objekten des Pakets \emph{java.lang.reflect} arbeiten.
+
+\subsection{visualj.util.Pair}
+
+Ein generisches Paar.
+
+\subsection{visualj.util.BreakpointViewer}
+
+Ein Subinterface von \emph{BreakpointObservable}. Alle Methoden, die Breakpoints betreffen, wurden aus dem \emph{LogManager} hierher verschoben.
+
+\subsection{visualj.util.BreakpointManager}
+
+Eine Implementierung von \emph{BreakpointViewer}.
+
+\subsection{visualj.utils.Messages}
+
+Eine statische Klasse für das Laden von lokalisierten Strings.
+
+\subsection{visualj.utils.ResourceLoader}
+
+Eine statische Klasse für das Laden von Bildern.
+
+\section{Veränderte Schnittstellen}
+
+\subsection{LogManager}
+
+\subsubsection{BreakpointViewer}
+
+Wie oben erwähnt, wurden alle Methoden, die Breakpoints betreffen, wurden aus dem \emph{LogManager} in das Interface \emph{BreakpointViewer} verschoben.
+
+Dem \emph{LogManager} wurde ein Attribut \emph{breakpointManager} hinzugefügt, auf das mit \emph{getBreakpointViewer()} zugegriffen werden kann.
+
+\subsubsection{minHaltingLevel}
+
+\emph{minHaltingLevel} wurde überall durch \emph{maxBlockingLevel} ersetzt.
+
+\renewcommand{\arraystretch}{1.5}
+\subsubsection{continueExecution}
+
+Ein Rückgabewert wurde hinzugefügt.\\\\
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & LogManager::continueExecution()\\
+  \hline
+ \textit{Visibility} & public\\
+  \hline
+ \textit{Parameters} & \textit{none}\\
+  \hline
+ \textit{Return value} & boolean \emph{true} if execution was successfully continued, \emph{false} otherwise. More formally it returns \emph{false} if execution is already in progress and therefore does not need to be continued.\\
+  \hline
+ \textit{Behavior} & Continues the execution which was blocked by the \emph{breakpoint(int)} method.\\
+  \hline
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+
+\section{Veränderte Anforderungen}
+
+\subsection{/F60/}
+
+Laut Pflichtenheft werden alle Eingaben für die Effizienzmessung gespeichert, um später wiederhergestellt werden zu können. Dies ist gilt in der Implementierung nur für Eingaben, bei denen sowohl das Objekt, auf dem die Methode aufgerufen wird, als auch alle an die Methode übergebenen Parameter serialisierbar sind.
+
+\subsection{/F80/}
+\label{F80}
+
+Die Messung des Speicherverbrauchs verläuft anders als im Pflichenheft beschrieben: Es wird jeweils vor und nach dem Methodenaufruf gemessen, wie viel Speicher gerade verbraucht wird. Anschließend wird der Endwert vom Startwert abgezogen. So weiß man genau, wie viel Speicher in der Methode alloziert wurde (vorausgesetzt der \emph{Garbage Collector} läuft nicht während der Ausführung der Methode. Dies passiert allerdings nur in Ausnahmefällen, nämlich dann, wenn in der Methode der Speicher knapp wird).
+
+\chapter{Umsetzung}
+
+\section{Implementierte Musskriterien}
+
+Alle Musskriterien wurden implementiert.
+
+\section{Implementierte Wunschkriterien}
+
+\begin{itemize}
+	\item Visualisierung von Graphen und Maps
+	\begin{itemize}
+		\item Graphen werden bislang noch nicht gänzlich korrekt angezeigt werden. Das benutzte Graph-Layout der JUNG-Bibliothek passt die Darstellung an die gewählte \emph{Dimension} an, achtet dabei jedoch nicht auf Knotengrößen, die vom Standard abweichen, was zur Folge hat, dass die Knoten am Rand abgeschnitten dargestellt werden. (höchstens bis zur Hälfte des Knotens)
+	\end{itemize}
+	\item Vergleich von Messergebnissen in der GUI
+	\begin{itemize}
+		\item Im \emph{EfficiencyResultWindow} können Ergebnisse exportiert werden. Exportierte Ergebnisse können importiert und miteinander verglichen werden.
+	\end{itemize}
+	\item Effizienzmessung Speicherverbrauch
+	\begin{itemize}
+		\item siehe \hyperref[F80]{\emph{Änderungen an \emph{/F80/}}}
+	\end{itemize}
+\end{itemize}
+
+\section{Nicht implementierte Wunschkriterien}
+
+Die Erstellung von Kontrollflussgraphen wurde nicht implementiert; erstens aus Zeitgründen, zweitens da diese nichts mit den anderen Kriterien zu tun hat und sich das Projekt damit recht weit von der eigentlichen Zielsetzung entfernt hätte.
+
+\chapter{Unit Tests}
+
+Dieses Kapitel enthält eine Übersicht über alle Komponententests. Diese finden sich im Ordner \emph{test}.
+
+Für GUI-Klassen gibt es im Order \emph{test\_gui} zusätzlich interaktive Tests, welche hier nicht weiter erläutert werden.
+
+\section{datavis.logger}
+
+\renewcommand{\arraystretch}{1.5}
+\subsection{LoggerTest}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testInitialization\\
+  \hline
+ \textit{JavaDoc} & Tests if loggers are initialized correctly.
+	 In particular, loggers initialized after one or multiple breakpoints must fill up their history with \emph{null}.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{ArrayLoggerTest}
+
+\subsubsection{testCloneValueUncloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueUncloneable\\
+  \hline
+ \textit{JavaDoc} & When passed an array containing uncloneable values, the \emph{ArrayLogger::cloneValue(Object[])} method should return a shallow copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testCloneValueCloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueCloneable\\
+  \hline
+ \textit{JavaDoc} & When passed an array containing only cloneable values, the \emph{ArrayLogger::cloneValue(Object[])} method should return a deep copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{CustomCloneLoggerTest}
+
+\subsubsection{testCloneValue}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValue\\
+  \hline
+ \textit{JavaDoc} & The cloning lambda method must be called correctly. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testCloneValueException}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueException\\
+  \hline
+ \textit{JavaDoc} & Exceptions thrown by the lambda method should not be caught by the logger. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{DeepCloneableLoggerTest}
+
+\subsubsection{testCloneValue}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValue\\
+  \hline
+ \textit{JavaDoc} & The clone method must be called correctly. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{GraphLoggerTest}
+
+\subsubsection{testCloneValueUncloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueUncloneable\\
+  \hline
+ \textit{JavaDoc} & When passed a graph containing uncloneable values, the \emph{GraphLogger::cloneValue(Object[])} method should return a shallow copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testCloneValueCloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueCloneable\\
+  \hline
+ \textit{JavaDoc} & When passed a graph containing only cloneable values, the \emph{GraphLogger::cloneValue(Object[])} method should return a deep copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{ListLoggerTest}
+
+\subsubsection{testCloneValueUncloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueUncloneable\\
+  \hline
+ \textit{JavaDoc} & When passed a list containing uncloneable values, the \emph{ListLogger::cloneValue(Object[])} method should return a shallow copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testCloneValueCloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueCloneable\\
+  \hline
+ \textit{JavaDoc} & When passed a list containing only cloneable values, the \emph{ListLogger::cloneValue(Object[])} method should return a deep copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{MapLoggerTest}
+
+\subsubsection{testCloneValueUncloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueUncloneable\\
+  \hline
+ \textit{JavaDoc} & When passed a map containing uncloneable values, the \emph{MapLogger::cloneValue(Object[])} method should return a shallow copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testCloneValueCloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueCloneable\\
+  \hline
+ \textit{JavaDoc} & When passed a map containing only cloneable values, the \emph{MapLogger::cloneValue(Object[])} method should return a deep copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{PrimitiveArrayLoggerTest}
+
+\subsubsection{testCloneValue}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValue\\
+  \hline
+ \textit{JavaDoc} & The clone method must return a copy of the array. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{TreeLoggerTest}
+
+\subsubsection{testCloneValueUncloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueUncloneable\\
+  \hline
+ \textit{JavaDoc} & When passed a tree containing uncloneable values, the \emph{TreeLogger::cloneValue(Object[])} method should return a shallow copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testCloneValueCloneable}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCloneValueCloneable\\
+  \hline
+ \textit{JavaDoc} & When passed a tree containing only cloneable values, the \emph{TreeLogger::cloneValue(Object[])} method should return a deep copy.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\section{efficiency.measure}
+
+\subsection{EfficiencyTestTest}
+
+\subsubsection{testDefaultGenerator}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testDefaultGenerator\\
+  \hline
+ \textit{JavaDoc} & Trivial \emph{EfficiencyTest} using a two-dimensional array for the arguments.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+ \hline
+\end{tabular}
+
+\subsubsection{testCustomGenerator}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCustomGenerator\\
+  \hline
+ \textit{JavaDoc} & Trivial \emph{EfficiencyTest} using a custom \emph{EfficiencyTest.ArgumentTupleGenerator} array for the arguments.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNullMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNullMethod\\
+  \hline
+ \textit{JavaDoc} & A \emph{NullPointerException} should be thrown if \emph{null} is passed as a method.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testIllegalNullArgs}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testIllegalNullArgs\\
+  \hline
+ \textit{JavaDoc} & A \emph{NullPointerException} should be thrown if the array of specified argument tuples is \emph{null}.
+ 
+	 To ensure consistency with {@link TestRun}, the argument tuples themselves may be \emph{null} if the method takes no arguments.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNullCustomGenerator}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNullCustomGenerator\\
+  \hline
+ \textit{JavaDoc} & A \emph{NullPointerException} should be thrown if \emph{null} is passed as a custom generator.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testIllegalArgument}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testIllegalArgument\\
+  \hline
+ \textit{JavaDoc} & An \emph{IllegalArgumentException} should be thrown if the method cannot be called with the specified arguments.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testDefaultConstruction}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testDefaultConstruction\\
+  \hline
+ \textit{JavaDoc} & If \emph{null} is passed as the object on which to invoke a non-static method, the class's default constructor should be used to construct an object. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNoDefaultConstructorStatic}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNoDefaultConstructorStatic\\
+  \hline
+ \textit{JavaDoc} & If \emph{null} is passed as the object on which to invoke a static method, and the class has no default constructor, no exception should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNoDefaultConstructorNonStatic}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNoDefaultConstructorNonStatic\\
+  \hline
+ \textit{JavaDoc} & If \emph{null} is passed as the object on which to invoke a non-static method, and the class has no default constructor, a \emph{NoDefaultConstructorException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testIllegalAccess}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testIllegalAccess\\
+  \hline
+ \textit{JavaDoc} & If the method to test is not visible to \emph{EfficiencyTest}, an \emph{IllegalAccessException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testInvocationTargetMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testInvocationTargetMethod\\
+  \hline
+ \textit{JavaDoc} & If the method to test throws an exception, an \emph{InvocationTargetException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testInvocationTargetConstructor}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testInvocationTargetConstructor\\
+  \hline
+ \textit{JavaDoc} & If the class's default constructor throws an exception, an \emph{InvocationTargetException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{EfficiencyTestSerializationTest}
+
+\subsubsection{testSerializationNonStaticMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testSerializationNonStaticMethod\\
+  \hline
+ \textit{JavaDoc} & Serialize an \emph{EfficiencyTest} for running a non-static method on a specified object. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testSerializationStaticMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testSerializationStaticMethod\\
+  \hline
+ \textit{JavaDoc} & Serialize an \emph{EfficiencyTest} for running a static method. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNotSerializableArgs}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNotSerializableArgs\\
+  \hline
+ \textit{JavaDoc} & If the arguments passed to the method are not serializable, a \emph{NotSerializableException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNotSerializableObject}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNotSerializableObject\\
+  \hline
+ \textit{JavaDoc} & If the object on which to run the method is not serializable, a \emph{NotSerializableException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{TestRunTest}
+
+\subsubsection{testStaticMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testDefaultGenerator\\
+  \hline
+ \textit{JavaDoc} & Trivial \emph{TestRun} for a static method. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+ \hline
+\end{tabular}
+
+\subsubsection{testNonStaticMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testCustomGenerator\\
+  \hline
+ \textit{JavaDoc} & Trivial \emph{TestRun} for a non-static method. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNullMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNullMethod\\
+  \hline
+ \textit{JavaDoc} & A \emph{NullPointerException} should be thrown if \emph{null} is passed as a method.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testIllegalNullArgs}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testIllegalNullArgs\\
+  \hline
+ \textit{JavaDoc} & An \emph{IllegalArgumentException} should be thrown if the method takes at least one argument, but the array of specified arguments is \emph{null}.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNullArgs}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testIllegalNullArgs\\
+  \hline
+ \textit{JavaDoc} & If the method takes no arguments, and the array of specified arguments is \emph{null}, the test run should complete successfully. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testIllegalArgument}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testIllegalArgument\\
+  \hline
+ \textit{JavaDoc} & An \emph{IllegalArgumentException} should be thrown if the method cannot be called with the specified arguments.\\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testDefaultConstruction}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testDefaultConstruction\\
+  \hline
+ \textit{JavaDoc} & If \emph{null} is passed as the object on which to invoke a non-static method, the class's default constructor should be used to construct an object. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNoDefaultConstructorStatic}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNoDefaultConstructorStatic\\
+  \hline
+ \textit{JavaDoc} & If \emph{null} is passed as the object on which to invoke a static method, and the class has no default constructor, no exception should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNoDefaultConstructorNonStatic}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNoDefaultConstructorNonStatic\\
+  \hline
+ \textit{JavaDoc} & If \emph{null} is passed as the object on which to invoke a non-static method, and the class has no default constructor, a \emph{NoDefaultConstructorException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testIllegalAccess}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testIllegalAccess\\
+  \hline
+ \textit{JavaDoc} & If the method to test is not visible to \emph{EfficiencyTest}, an \emph{IllegalAccessException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testInvocationTargetMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testInvocationTargetMethod\\
+  \hline
+ \textit{JavaDoc} & If the method to test throws an exception, an \emph{InvocationTargetException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testInvocationTargetConstructor}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testInvocationTargetConstructor\\
+  \hline
+ \textit{JavaDoc} & If the class's default constructor throws an exception, an \emph{InvocationTargetException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{TestRunSerializationTest}
+
+\subsubsection{testSerializationNonStaticMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testSerializationNonStaticMethod\\
+  \hline
+ \textit{JavaDoc} & Serialize a \emph{TestRun} for running a non-static method on a specified object. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testSerializationStaticMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testSerializationStaticMethod\\
+  \hline
+ \textit{JavaDoc} & Serialize a \emph{TestRun} for running a static method. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNotSerializableArgs}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNotSerializableArgs\\
+  \hline
+ \textit{JavaDoc} & If the arguments passed to the method are not serializable, a \emph{NotSerializableException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNotSerializableObject}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNotSerializableObject\\
+  \hline
+ \textit{JavaDoc} & If the object on which to run the method is not serializable, a \emph{NotSerializableException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsection{TestRunSerializationTest}
+
+\subsubsection{testSerializationNonStaticMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testSerializationNonStaticMethod\\
+  \hline
+ \textit{JavaDoc} & Serialize a \emph{TestRunResult} for a non-static method. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testSerializationStaticMethod}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testSerializationStaticMethod\\
+  \hline
+ \textit{JavaDoc} & Serialize a \emph{TestRunResult} for a static method. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+
+\subsubsection{testNotSerializableArgs}
+\begin{tabular}{p{2.3cm}  p{11.5cm}}
+  \hline
+ \textit{Name} & testNotSerializableArgs\\
+  \hline
+ \textit{JavaDoc} & If the arguments passed to the method are not serializable, a \emph{NotSerializableException} should be thrown. \\
+  \hline
+ \textit{Zusätzliche Anmerkungen} & \\
+  \hline
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+\chapter{Anhang}
+
+\section{Glossar}
+% Die Begriffe hier sollten alphabetisch geordnet sein.
+
+\paragraph{Algorithmus} Eine Folge von Rechenvorschriften, die ein bestimmten Problem löst und dabei auf in diesem Projekt zu visualisierenden Datenstrukturen arbeitet.
+
+\paragraph{API} Ein Programmteil, der von einem Softwaresystem anderen Programmen zur Anbindung an das System zur Verfügung gestellt wird.
+
+\paragraph{Bibliothek} Eine Sammlung von Unterprogrammen/-Routinen, die Lösungswege für thematisch zusammengehörende Problemstellungen anbieten.
+
+\paragraph{Breakpoint} Ein Punkt, an dem die Ausführung des Programmes unterbrochen und an das Plugin übergeben wird, welches die Ausführung auch fortsetzen kann.
+
+\paragraph{Datenstruktur} Eine primitives Datum oder ein Objekt, welches mehrere Daten vereint.
+
+\paragraph{Debian}  Ein Betriebssystem basierend auf den grundlegenden Systemwerkzeugen des GNU-Projektes sowie dem Linux-Kernel.
+
+\paragraph{Debugger} Ein Programm beziehungsweise Teil eines Programms, der dem Benutzer hilft, Fehler in seinem Programmcode zu finden.
+
+\paragraph{Mac OS X} Ein Unix-basiertes Betriebssystem für Personal Computer, das vom kalifornischen Unternehmen Apple entwickelt wird.
+
+\paragraph{Methode} Die Implementierung eines Algorithmus in einer Java-Klasse.
+
+\paragraph{Out-of-the-box Installation} Eine Eigenschaft einer Software- oder Hardwarekomponente, die nach der Installation ohne weitere Anpassung der Komponente sofort zur Verfügung steht.
+
+\paragraph{Parametertupel} Alle an eine Methode übergebenen Parameter. Zum Beispiel wären gültige Parametertupel für \verb|void foo(char,int,int)| \verb|('a',4,2)| oder \verb|('b',2,1)|
+
+\paragraph{Plugin} Ein optionales Software-Modul, das eine bestehende Software erweitert bzw. verändert.
+
+\paragraph{Speicherkomplexität} Der Speicherplatz, den eine Methode abhängig von ihren Eingaben benötigt.
+
+\paragraph{Ubuntu} Eine kostenlose Linux-Distribution, die auf Debian basiert.
+
+\paragraph{Windows} Betriebssysteme des US-amerikanischen Unternehmens Microsoft, die vor allem auf Personal Computern und Servern verbreitet sind.
+
+\paragraph{Zeitkomplexität} Die Zeit, die eine Methode abhängig von ihren Eingaben, benötigt, gemessen in Nanosekunden oder in Rechenschritten.
+
+\end{document}

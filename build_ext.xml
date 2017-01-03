@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for VisualJ Plugin">
+    <target name="create_run_jar">
+        <jar destfile="VisualJPlugin.jar" filesetmanifest="skip" includes="**/visualjplugin/**">
+        	
+            <manifest>
+                <attribute name="Main-Class" value="edu.kit.ipd.sdq.visualjplugin.VisualJExtension"/>
+                <attribute name="Class-Path" value=". ../userlib/VisualJ.jar"/>
+            </manifest>
+            <fileset dir="bin" includes="**/visualjplugin/**"/>
+        </jar>
+    </target>
+</project>

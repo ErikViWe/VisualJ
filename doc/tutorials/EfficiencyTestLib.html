@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Effizienzmessungen über die Bibliotheks-API</title>
+		<link rel="stylesheet" href="tutorials.css" />
+	</head>
+
+	<body>
+		<h1>Effizienzmessungen über die Bibliotheks-API</h1>
+		<h3>Einleitung</h3>
+		<p>
+			Herr Bob möchte seinen Schülern einen Vergleich mehrerer Sortieralgorithmen vorstellen. Hierzu will er nicht die BlueJ-GUI verwenden,
+			sondern mithilfe der API der VisualJ-Bibliothek eigenständig bestimmen, welche Argumente an die zu testenden Methoden übergeben werden.
+		</p>
+		<p>
+			Hier nochmal beispielhaft zwei Sortieralgorithmen mit Schrittzähler:
+
+			<pre><code>	public static void bubbleSort(int[] arr) {
+		for (int i = 1; i &lt; arr.length; ++i) {
+			for (int j = 0; j &lt; arr.length - i; ++j) {
+				if (arr[j] > arr[j + 1]) {
+					swap(arr, j, j + 1);
+				}
+				
+				StepCounter.step();
+			}
+		}
+	}
+	
+	public static void selectionSort(int[] arr) {
+		for (int i = 0; i &lt; arr.length - 1; ++i) {
+			int min = i;
+			
+			for (int j = i + 1; j &lt; arr.length; ++j) {
+				if (arr[j] &lt; arr[min]) {
+					min = j;
+				}
+				
+				StepCounter.step();
+			}
+			
+			swap(arr, i, min);
+		}
+	}</code></pre> 
+		</p>
+		<p>
+			Herr Bob hat nun zwei Möglichkeiten, die übergebenen Argumente zu bestimmen.
+		</p>
+		<h3>Hartkodierte Eingaben</h3>
+		<p>
+			Die erste und einfachere Methode besteht darin, einfach die Argumente hart zu kodieren:
+		</p>
+		<pre><code>	public void compareSortingAlgorithms() {
+		List&lt;TestRun.Result[]&gt; results = new LinkedList&lt;&gt;();
+		
+*1	  Object[][] arguments = new Object[][] {
+				{ new int[] {3, 1, 2} },
+				{ new int[] {5, 4, 5, 6, 2, 3, -42, 21} }
+		};
+		
+*2		try {			
+			EfficiencyTest bubbleSortTest = new EfficiencyTest(
+					null,
+					EfficiencyTestDemo.class.getDeclaredMethod("bubbleSort", int[].class),
+					arguments,
+					10
+			);
+			
+			EfficiencyTest selectionSortTest = new EfficiencyTest(
+					null,
+					EfficiencyTestDemo.class.getDeclaredMethod("selectionSort", int[].class),
+					arguments,
+					10
+			);
+			
+*3			results.add(bubbleSortTest.run());
+			results.add(selectionSortTest.run());
+		} catch (IllegalArgumentException | NoSuchMethodException | SecurityException
+				| NoDefaultConstructorException | InvocationTargetException | IllegalAccessException e) {
+			System.err.println("Exception while running efficiency tests: " + e.getMessage());
+			e.printStackTrace();
+		}
+*4		EfficiencyResultWindow win = new EfficiencyResultWindow(results);
+		win.setVisible(true);
+		waitForWindowToClose(win);
+	}</code></pre> 
+		</p>
+		<p>
+			Herr Bob erstellt ein Array, welches alle Argumenttupel enthält, die getestet werden sollen (*1).
+		</p>
+		<p>
+			Der Typ dieses Arrays muss <code>Object[][]</code> sein. Genauer gesagt muss es, falls die zu testende Methode die Signatur
+			<code> methodName(Type0, Type1, Type2) </code>
+			hat, den folgenden Typ haben:
+
+			<pre><code>	Object[][] {
+		{ Type0, Type1, Type2 },
+		{ Type0, Type1, Type2 },
+		{ Type0, Type1, Type2 }
+		...
+	}</code></pre> 
+		</p>
+		<p>
+			Da die Methoden, die Herr Bob testen will, jeweils ein <code>int[]</code> als Argument nehmen, sieht das Array also aus wie im obigen Codebeispiel.
+		</p>
+		<p>
+			Anschließend erstellt er für jede zu testende Methode einen eigenen <code>EfficiencyTest</code> (*2).
+		</p>
+		<p>
+			Diesem übergibt er das Objekt, auf dem die Methode ausgeführt werden soll (hier beidesmal <code>null</code>, da beide Methoden statisch sind.
+			<code>null</code> ist auch für nicht-statische Methoden erlaubt, falls die Klasse einen öffentlichen Default-Konstruktor besitzt), 
+			die zu testende Methode, das <code>arguments</code>-Array, sowie eine Genauigkeit n.
+		</p>
+		<p>
+			Die Methode wird mit jedem Argumententupel n-mal ausgeführt. Im Ergebnisfenster sieht Herr Bob anschließend nur den Median aller gemessenen Werte über diese n Ausführungen.
+		</p>
+		<p>
+			Die <code>EfficiencyTest</code>s werden über <code>run()</code> ausgeführt (*3).
+		</p>
+		<p>
+			Anschließend erstellt Herr Bob ein Fenster, dem er eine Liste der Ergebnisse aller ausgeführten Tests übergibt (*4).
+		</p>
+		<p>
+			Noch ein wichtiger Hinweis: Bei primitiven Typen, Arrays derselben und Klassen, die eine <code>clone()</code>-Methode bereitstellen, ist es kein Problem, dasselbe <code>arguments</code>-Array
+			an alle <code>EfficiencyTest</code>s zu übergeben. Bei nicht klonbaren Typen, dürfen entweder die zu testenden Methoden ihre Eingaben nicht verändern, oder es muss für jeden Test ein eigenes <code>arguments</code>-Array
+			erstellt werden. Dasselbe gilt bei nicht-statischen Methoden für die Objekte, auf denen diese ausgeführt werden.
+		</p>
+		<h3>Generator</h3>
+		<p>
+			Die zweite Methode besteht darin, einen Generator zu schreiben:
+
+			<pre><code>	public class MyGenerator implements EfficiencyTest.ArgumentTupleGenerator {
+		private final int NUMBER_OF_TUPLES = 50;
+		private int count = 1;
+		
+		@Override
+		public Object[] yield() {
+			if (count > NUMBER_OF_TUPLES) {
+				return null;
+			}
+			
+			Random rand = new Random();
+			int[] arr = new int[count * 10];
+			
+			for (int i = 0; i &lt; arr.length; ++i) {
+				arr[i] = rand.nextInt();
+			}
+			
+			++count;
+			return new Object[] { arr };
+		}
+	}</code></pre> 
+		</p>
+		<p>
+			Dieser Generator verfügt über eine <code>yield()</code>-Methode, die die zu übergebenden Argumenttupel in der gewünschten Reihenfolge zurückgibt.
+			Nachdem der letzte Tupel zurückgegeben wurde, muss bei jedem folgenden Aufruf <code>null</code> zurückgegeben werden. </p>
+		<p>
+			Herr Bob kann nun statt einem <code>Object[][]</code>-Array eine Instanz dieses Generators übergeben:
+
+			<pre><code>	public void compareSortingAlgorithmsAdvanced() {
+		List&lt;TestRun.Result[]&gt; results = new LinkedList&lt;&gt;();
+		
+		try {
+			EfficiencyTest bubbleSortTest = new EfficiencyTest(
+					null,
+					EfficiencyTestDemo.class.getDeclaredMethod("bubbleSort", int[].class),
+					new MyGenerator(),
+					10
+			);
+	
+			EfficiencyTest selectionSortTest = new EfficiencyTest(
+					null,
+					EfficiencyTestDemo.class.getDeclaredMethod("selectionSort", int[].class),
+					new MyGenerator(),
+					10
+			);
+			
+			results.add(bubbleSortTest.run());
+			results.add(selectionSortTest.run());
+		} catch (IllegalArgumentException | NoSuchMethodException | SecurityException
+				| NoDefaultConstructorException | InvocationTargetException | IllegalAccessException e) {
+			System.err.println("Exception while running efficiency tests: " + e.getMessage());
+			e.printStackTrace();
+		}
+		
+		EfficiencyResultWindow win = new EfficiencyResultWindow(results);
+		win.setVisible(true);
+		waitForWindowToClose(win);
+	}</pre></code>
+		</p>
+		<p>
+			Wichtig ist hierbei, dass jeder <code>EfficiencyTest</code> eine eigene Instanz des Generators bekommt.
+		</p>
+		<h3>Schluss</h3>
+		<p>
+			Das fertige EfficiencyResultWindow sieht dann folgendermaßen aus:
+			<img src="img/EfficiencyResultWindow_runtime.png" alt="EfficiencyResultWindow">
+		</p>
+		<p>
+			Im Datei-Menü lassen sich Testergebnisse von einzelnen Methoden speichern und vorher gespeicherte Testergebnisse laden. So kann man auf einfache Weise verschiedene Methoden vergleichen.
+		</p>
+		<p>
+			Mit den unteren Schaltflächen kann man zwischen drei Testgrößen (Laufzeit in Nanosekunden, Schrittzähler, Speicherverbrauch) und zwei Darstellungen (Balkendiagramm, Graph/Streudiagramm) wechseln
+		</p>
+	</body>
+</html>

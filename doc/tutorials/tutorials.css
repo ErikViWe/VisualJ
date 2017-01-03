@@ -1,0 +1,58 @@
+html {
+	box-sizing: border-box;
+	background-color: #e9ebee;
+}
+
+*, *::before, *::after {
+	box-sizing: inherit;
+}
+
+body {
+	font-family: "Arial";
+	font-size: 12pt;
+	width: 100%;
+	max-width: 1300px;
+	margin: 10px auto;
+	background-color: white;
+	padding: 20px;
+	border: 1px solid #C7C7C7;
+	border-radius: 10px;
+}
+
+h1 {
+	margin: 0 0 10px 0;
+}
+
+code, pre {
+	font-family: "Courier New";
+	-moz-tab-size: 4;
+	tab-size: 4;
+}
+
+code {
+	display: inline-block;
+	background-color: lightgrey;
+	padding: 5px;
+	border-radius: 5px;
+}
+
+table, th, td {
+	border-collapse: collapse;
+	border-color: black;
+	border-spacing: 0px;
+	border-style: solid;
+	border-width: 1px;
+	padding: 2px;
+}
+
+td {
+	text-align: center;
+}
+
+td.implement {
+	text-align: left;
+}
+
+img {
+	max-width: 100%;
+}

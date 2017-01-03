@@ -1,0 +1,296 @@
+\documentclass[a4paper]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage{enumerate}
+\usepackage{hyperref}
+\usepackage{xstring}
+\usepackage{minitoc}
+\usepackage{float}
+\usepackage{seqsplit}
+
+\usepackage[a4paper, total={15cm, 22cm}]{geometry}
+
+\usepackage{titlesec}
+\titleformat{\chapter}
+  {\normalfont\LARGE\bfseries}{\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+
+\ifx\pdftexversion\undefined
+\usepackage[dvips]{graphicx}
+\else
+\usepackage[pdftex]{graphicx}
+\DeclareGraphicsRule{*}{mps}{*}{}
+\fi
+
+% Kein Seitenumbruch zwischen Kapiteln
+%\usepackage{etoolbox}
+%\makeatletter
+%\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+
+\title{Testbericht -- VisualJ}
+\author{Mehdi Dado\\Florian Lanzinger\\Robin Schulz\\Tobias Stickling\\Erik Weinstock\\ \\
+Betreuer:\\Erik Burger\\Dominik Werle}
+\date{17.07.2016}
+
+\begin{document}
+% Initialisiere minitoc (für Funktionsübersicht)
+\dominitoc
+
+\maketitle
+\setcounter{tocdepth}{1}
+\tableofcontents
+\newpage
+
+\renewcommand{\arraystretch}{1.5}
+\chapter{Globale Testfälle}
+\begin{tabular}{|p{1cm} | p{7cm}| p{1cm}| p{7cm}|}
+  \hline
+ & Testfall & getestet & Anmerkungen \\
+  \hline
+\multirow{1}{*}  {/T10/} & Out-of-the-box Installation. & ja &\\
+  \hline
+\multirow{1}{*}  {/T20/} & Kompatibilität mit BlueJ 3.1.7 und höher. & ja &\\
+  \hline
+\multirow{1}{*}  {/T30/} & Kompatibilität mit Windows, Mac OS X, Ubuntu und Debian. & ja &\\
+  \hline
+\multirow{2}{*}  {/T40/} & Speicherung der vom Benutzer eingegeben Testdaten für die Effizienzmessung. & ja &\\
+  \hline
+\multirow{2}{*}  {/T50/} & Pausierung und Fortsetzung des Programms an
+vorgesehenen Stellen. & ja &\\
+  \hline
+\multirow{1}{*}  {/T60/} & Darstellung von vorheriger gecacheten Variablenzuständen. & ja &\\
+  \hline
+\multirow{2}{*}  {/T70/} & Visualisierung von beschränkt großen Datenstrukturen während der Laufzeit. & ja &\\
+  \hline
+\multirow{1}{*}  {/T80/} & Visualisierung der Zeitkomplexität der Methoden. & ja &\\
+  \hline
+\multirow{1}{*}  {/T90/} & Visualisierung der Speicherkomplexität der
+Methoden. & ja &\\
+  \hline
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+
+\chapter{Änderungen und neue Features}
+
+\section{Allgemeines}
+\begin{itemize}
+	\item Es wurden diverse \glqq magic numbers\grqq zu Konstanten umgewandelt.
+	\item Catch-Blöcke wurden überarbeitet und mit (besseren) Ausgaben  (\emph{PopupUtils}) versehen.
+\end{itemize}
+
+\section{reset}
+
+Es gibt nun eine Methode \emph{Breakpoints.reset}, die den gesamten statischen Zustand des Pakets (allen voran den Breakpoint-Zähler) zurücksetzt. Dieses Feature ist nötig, da BlueJ den statischen Zustand eines Programms nicht immer von selbst zurücksetzt.
+
+\section{Export}
+
+Es wurde dem EfficiencyTestInputWindow ein Button Export hinzugefügt, welcher es dem benutzer ermöglicht seine Testfälle zu exportieren. Das Exportformat ist wie folgt aufgebaut: jede Zeile des Dokuments repräsentiert eine Testinstanz. Die einzelnen Attribute sind hintereinander, mit einem Semikolon getrennt, angeordnet. Das Dateiformat ist Visual J Import kurz vji.
+
+\section{Import}
+
+Zudem wurde dem EfficiencyTestInputWindow ein Button Import hinzugefügt, welcher .vji-Dateien einliest und die Testinstanzen erstellt. Beim import gilt es zu beachten, dass nur Dateien importiert werden dürfen, welche auch zu der zu prüfenden Methode passen. Daraus folgt, dass die Anzahl der Attribute als auch die Datentypen der Methode mit den der Importdatei übereinstimmen müssen.
+
+\section{DeleteAll}
+
+Die letzte Änderung am EfficiencyTestInputWindow ist die Möglichkeit durch klicken auf den neuen Button "Alle löschen" im englischen "Delete all", alle Testinstanzen von der Liste zu löschen. Zu vor war dies nur möglich, in dem der Benutzer jeden Testfall einzeln manuell schließt.
+
+\section{DialogUtils}
+
+Die Klasse \emph{ExceptionPopup} wurde in \emph{DialogUtils} umbenannt und bietet nun weitere Methoden zur Erzeugung von Dialog-Fenstern.
+
+\section{Window- \& Visualizer-Verbesserungen}
+
+\begin{itemize}
+	\item Es ist nun möglich, Visualizern im Konstruktor einen Titel zu geben. Dieser wird über der zu visualisierenden Datenstruktur angezeigt.
+	\item Visualizer werden nun in eine Scroll-Pane eingebettet, so dass auch größere Datenstrukturen ohne Probleme dargestellt werden können.
+	\item Das ControlPanel reagiert nun auf Tastendrücke (z.B. Pfeiltasten für Vor/Zurück)
+	\item Visualizer werden nun zentriert angezeigt.
+	
+\end{itemize}
+
+\section{Locale}
+
+Die GUIs von \emph{VisualJ} sind nun nur auf Deutsch, wenn \emph{BlueJ} auf Deutsch eingestellt ist. Ansonsten sind sie englisch.
+
+\section{Plugin-Initialisierung}
+\begin{itemize}
+	\item Nicht-statische Methoden sind nun nur dann erlaubt, wenn ein default-Konstruktor für die Klasse existiert.
+	\item Alle Methoden die nicht private sind, und obige sowie die Parameterbedingung erfüllen, sind nun erlaubt.
+\end{itemize}
+
+\section{Visualisizer-Klassen}
+\begin{itemize}
+	\item Das Rendering wurde vereinheitlicht (\emph{Array}-, \emph{List}-, und beide Baum-\emph{Visualizer} nutzen nun die Klasse \emph{VertexRenderer})
+	\item Der Rand um jeden Visualizer wurde minimiert, sodass das \emph{Window} sich um den Rand kümmern kann.
+	\item Der \emph{GraphVisualizer} nutzt nun ein anderes Layout, welches dazu tendiert, in den meisten Fällen den Rand nicht abzuschneiden. 
+\end{itemize}
+
+ 
+\chapter{Fehlerbehebungen}
+
+\section{Plugin}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & Fehlende Kompatibilitätsprüfung mit BlueJ. \\
+  \hline
+  \textit{Grund} & \\
+  \hline
+  \textit{Behebung} & Die Version von \emph{Java} und von der \emph{BlueJ Extensions API} wird nun überprüft. \\
+  \hline
+\end{tabular}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & Die vom \emph{StepCounter} gezählten Schritte wurden im \emph{EfficiencyResultWindow} nicht angezeigt, falls dieses über die BlueJ-GUI erstellt wurde.
+  
+  Benutzte man stattdessen die Bibliotheks-API, wurden diese korrekt angezeigt. \\
+  \hline
+  \textit{Grund} & Ein \emph{BlueJ}-Projekt nutzt einen eigenen \emph{ClassLoader}, wodurch die \emph{StepCounter}-Klasse zweimal geladen wurde: einmal vom \emph{ClassLoader} des \emph{BlueJ}-Projekts und noch einmal vom Standard-\emph{ClassLoader} in der \emph{VisualJ}-Bibliothek.
+  
+  Hierdurch gab es zwei Instanzen des statischen Schrittzählers. \\
+  \hline
+  \textit{Behebung} & Das \emph{EfficiencyResultWindow} wird nun nicht mehr direkt erstellt, sondern es wird mit dem \emph{BlueJ-ClassLoader} eine Klasse, die das \emph{Runnable}-Interface implementiert, geladen. Eine Instanz dieser Klasse wird dann in einem neuen Thread ausgeführt und erstellt dort das \emph{EfficiencyResultWindow}.  So ist sichergestellt, dass alle Klassen, auf die das \emph{EfficiencyResultWindow} zugreift, ebenfalls mit dem \emph{BlueJ-ClassLoader} geladen werden. \\
+  \hline
+\end{tabular}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & String-Parameter waren im \emph{EfficiencyTestInputWindow} nicht erlaubt. \\
+  \hline
+  \textit{Grund}  \\
+  \hline
+  \textit{Behebung} & Die Möglichkeit, Strings einzugeben (jedoch nicht zu generieren) wurde implementiert, ebenso wurde ein kleines Escape-System eingeführt, sodass Import-/ Export möglich waren, auch wenn der Benutzer das im IO-Format genutzte Trennzeichen (\emph{;}) eingibt. \\
+  \hline
+\end{tabular}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & Der Menüeintrag des Effizienzmessungsplugins und deren Inhalte wurden nicht korrekt angezeigt: Methoden wurden nicht auf erlaubte Parameter überprüft. \\
+  \hline
+  \textit{Grund}  \\
+  \hline
+  \textit{Behebung} & Die Prüfung der erlaubten Parametertypen wurde vom \emph{EfficiencyTestInputWindow} in die \emph{MenuBuilder}-Klasse verlagert, welche das besagte Menü generiert. \\
+  \hline
+\end{tabular}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & Leere Arrays wurden nicht weiterverarbeitet. (Wurf einer \emph{NumberFormatException} von \emph{ParameterTuplePane}  \\
+  \hline
+  \textit{Grund} & leere Arrays wurden zu einelementigen Arrays geparst, weshalb versucht wurde, einen leeren String zu parsen. \\
+  \hline
+  \textit{Behebung} & Leere String-Arrays werden als leere Wert-Arrays zurückgegeben. \\
+  \hline
+\end{tabular}
+
+\section{Bibliothek -- Datavis}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & Der Geschwindigkeits-Slider im Visualizer-Fenster hatte nur eine Wirkung, wenn die Visualisierung pausiert ist. \\
+  \hline
+  \textit{Grund} & Der Wert wurde nur abgefragt, wenn die Visualisierung gestartet oder nach einer Pause fortgesetzt wurde. \\
+  \hline
+  \textit{Behebung} & Bei einer Änderung des Wertes wird die Visualisierung pausiert und mit der neuen Geschwindigkeit neu gestartet. \\
+  \hline
+\end{tabular}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & Ein \emph{EfficiencyResultWindow} musste nach der Erstellung erst per \emph{setVisible} sichtbar gemacht werden, andere Fenster-Klassen jedoch nicht. \\
+  \hline
+  \textit{Grund} & \\
+  \hline
+  \textit{Behebung} & Es muss nun bei allen Fenstern \emph{setVisible(true)} aufgerufen werden. \\
+  \hline
+\end{tabular}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & Stellte man im Visualisierungsfenster die Geschwindigkeit auf 0, wurde die Ausführung nicht pausiert. \\
+  \hline
+  \textit{Grund} & Die \emph{ScheduledThreadPoolExecutor}-Klasse erlaubt keinen Delay von 0. \\
+  \hline
+  \textit{Behebung} & Die minimale Geschwindigkeit ist nun 1. \\
+  \hline
+\end{tabular}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & Bei \emph{ImplicitHeapVisualizer} und \emph{TreeVisualizer} wurde die Knotenreihenfolge ignoriert bzw zufällig gewählt, was bei jeder Aktualisierung die Baumstruktur geändert hat. \\
+  \hline
+  \textit{Grund} & \emph{DelegateTree} wurde keine Ordnung übergeben\\
+  \hline
+  \textit{Behebung} & \emph{DelegateTree} wird nun ein \emph{DirectedOrderedSparseMultigraph} übergeben.\\
+  \hline
+\end{tabular}
+
+\section{Bibliothek -- Measurement}
+
+\subsection{}
+\begin{tabular}{p{2.5cm}  p{11.5cm}}
+  \hline
+  \textit{Symptom} & Die Laufzeit der ersten Ausführung unterscheidete sich stark von den darauf folgenden. \\
+  \hline
+  \textit{Grund} & Die Argumente, die an die Methode übergeben wurden, wurden nicht geklont. \\
+  \hline
+  \textit{Behebung} & Die Argumente werden nun vor jeder Ausführung geklont. \\
+  \hline
+\end{tabular}
+
+\chapter{Anhang}
+
+\section{Glossar}
+% Die Begriffe hier sollten alphabetisch geordnet sein.
+
+\paragraph{Algorithmus} Eine Folge von Rechenvorschriften, die ein bestimmten Problem löst und dabei auf in diesem Projekt zu visualisierenden Datenstrukturen arbeitet.
+
+\paragraph{API} Ein Programmteil, der von einem Softwaresystem anderen Programmen zur Anbindung an das System zur Verfügung gestellt wird.
+
+\paragraph{Bibliothek} Eine Sammlung von Unterprogrammen/-Routinen, die Lösungswege für thematisch zusammengehörende Problemstellungen anbieten.
+
+\paragraph{Breakpoint} Ein Punkt, an dem die Ausführung des Programmes unterbrochen und an das Plugin übergeben wird, welches die Ausführung auch fortsetzen kann.
+
+\paragraph{Datenstruktur} Eine primitives Datum oder ein Objekt, welches mehrere Daten vereint.
+
+\paragraph{Debian}  Ein Betriebssystem basierend auf den grundlegenden Systemwerkzeugen des GNU-Projektes sowie dem Linux-Kernel.
+
+\paragraph{Debugger} Ein Programm beziehungsweise Teil eines Programms, der dem Benutzer hilft, Fehler in seinem Programmcode zu finden.
+
+\paragraph{Mac OS X} Ein Unix-basiertes Betriebssystem für Personal Computer, das vom kalifornischen Unternehmen Apple entwickelt wird.
+
+\paragraph{Methode} Die Implementierung eines Algorithmus in einer Java-Klasse.
+
+\paragraph{Out-of-the-box Installation} Eine Eigenschaft einer Software- oder Hardwarekomponente, die nach der Installation ohne weitere Anpassung der Komponente sofort zur Verfügung steht.
+
+\paragraph{Parametertupel} Alle an eine Methode übergebenen Parameter. Zum Beispiel wären gültige Parametertupel für \verb|void foo(char,int,int)| \verb|('a',4,2)| oder \verb|('b',2,1)|
+
+\paragraph{Plugin} Ein optionales Software-Modul, das eine bestehende Software erweitert bzw. verändert.
+
+\paragraph{Speicherkomplexität} Der Speicherplatz, den eine Methode abhängig von ihren Eingaben benötigt.
+
+\paragraph{Ubuntu} Eine kostenlose Linux-Distribution, die auf Debian basiert.
+
+\paragraph{Windows} Betriebssysteme des US-amerikanischen Unternehmens Microsoft, die vor allem auf Personal Computern und Servern verbreitet sind.
+
+\paragraph{Zeitkomplexität} Die Zeit, die eine Methode abhängig von ihren Eingaben, benötigt, gemessen in Nanosekunden oder in Rechenschritten.
+
+\end{document}

@@ -1,0 +1,20 @@
+#BlueJ class context
+comment0.params=arr
+comment0.target=void\ bubbleSort(int[])
+comment1.params=arr
+comment1.target=void\ selectionSort(int[])
+comment2.params=arr
+comment2.target=void\ insertionSort(int[])
+comment3.params=arr
+comment3.target=void\ heapSort(int[])
+comment4.params=arr\ i\ n\ log
+comment4.target=void\ siftDown(int[],\ int,\ int,\ edu.kit.ipd.sdq.visualj.datavis.logger.IntArrayLogger)
+comment5.params=arr
+comment5.target=void\ bogoSort(int[])
+comment6.params=arr
+comment6.target=boolean\ isSorted(int[])
+comment7.params=arr
+comment7.target=void\ shuffle(int[])
+comment8.params=arr\ i\ j
+comment8.target=void\ swap(int[],\ int,\ int)
+numComments=9

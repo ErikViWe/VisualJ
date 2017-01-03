@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Effizienzmessungen: Testfall Generierung und Testdurchführung</title>
+		<link rel="stylesheet" href="tutorials.css" />
+	</head>
+	<body>
+		<h1>Effizienzmessungen: Testfall Generierung und Testdurchführung</h1>
+		<p> 
+			Effizienzmessungen können nur an Methoden vorgenommen werden, die<br>
+			<ul>
+				<li><i>nicht</i> private sind</li>
+				<li>statisch sind oder einen default-Konstruktor besitzen</li>
+				<li>Nur folgende Parametertypen besitzen:
+					<ul>
+						<li>primitive Datentypen</li>
+						<li>Arrays von primitiven Datentypen</li>
+						<li>String</li>
+					</ul>
+				</li>
+			</ul>
+			Methoden, die diese Einschränkungen nicht erfüllen, werden nicht eingeblendet. <br>
+			Die Generierung von Parametertupeln funktioniert für Strings bislang nicht.
+		</p>
+		<p>
+			Um eine Effizienzmessung an einer ausgewählten Methode vorzunehmen, öffnen Sie das <code>EfficiencyTestInputWindow</code>:<br><br>
+			<img src="img/OpenEfficiencyTestInputWindow.png"> <br>
+		</p>
+
+		<p>
+			Dort können Sie durch Drücken auf die Schaltfläche "+" eine Testinstanz erstellen, also ein einzelnes Tupel von Parametern für die zu testende Methode
+			Tragen Sie ihre Werte in die entsprechenden Felder auf der Testinstanz ein. 
+			Hierbei ist zu beachten, dass Arrays sowohl mit als auch ohne eckige Klammern angegeben werden können.
+			Elementare Datentypen und Strings können ebenso ohne besondere Vorkehrungen eingetragen werden.
+		</p>
+
+
+
+		<p> 
+			Möchten Sie sich mehrere Instanzen generieren lassen, öffnet sich durch Drücken der Schaltfläche "Generator" ein neues Fenster.
+			In diesem Fenster wählen Sie für jedes Attribut ihrer Methode ein Muster, welches die Werte enstprechend generiert:
+			Elementare Datentypen und Strings  können wie folgt generiert werden:
+			<ul>
+				<li>statisch: Es wird immer derselbe Wert generiert</li>
+				<li>inkrementierend: Ab einem Wert <B>min</B> wird mit jeder neuen Testinstanz ein um <B>step</B> inkrementierter Wert generiert.</li>
+				<li>zufällig: Es wird ein Wert zwischen <B>min</B> und <B>max</B> generiert.
+			</ul>
+			Arrays hingegen kann man folgendermaßen generieren:
+			<ul>
+				<li> Länge: 
+					<li>statisch: Die Länge bleibt immer gleich.</li>
+					<li>inkrementierend: Das Array wird mit jeder neuen Testinstanz um <B>step</B> größer, angefangen bei <B>min</B>.
+				</li>
+				<li> Inhalte: Analog zur Generierung bei elementaren Datentypen.
+				</li>
+			</ul>
+			Durch Drücken auf "Generieren" werden die Testinstanzen generiert und automatisch zu den bereits existierenden Testfällen hinzugefügt.
+			Hierbei ist zu beachten, dass die Zahl bei "Anzahl", die Anzahl der Kopien einer Testinstanz darstellt. </p>
+
+		<p> 
+			Haben Sie ihre Auswahl an Testfällen getroffen oder generieren lassen, haben Sie die Wahl, diese als ".vji" Datei zu exportieren um sie
+			extern für einen späteren Versuch aufzubewahren. Besitzen Sie schon eine ".vji" Datei, welche Testfälle zu der <b>aktuellen</b> Methode enthält,
+			können Sie die Daten bequem über den Button "Importieren" zu Ihren Testfällen hinzufügen. 
+		</p>
+
+		<p> 
+			Nun ist es Zeit, ihren Algorithmus zu testen. Durch Betätigung des "Start" Buttons werden die einzelnen Testfälle geprüft. Die Genauigkeit gibt die Anzahl
+			der Testdurchläufe pro Testfall an.
+		</p>
+
+		<p>
+			Wurden alle Tests erfolgreich beendet, öffnet sich ein neues Fenster, in dem Sie die Ergebnisse der Messung in unterschiedlichen Formen auslesen und
+			interpretieren können. 
+		</p> 
+	</body>
+</html>
