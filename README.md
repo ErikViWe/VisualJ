@@ -13,3 +13,11 @@ To get this running:
 3. Run both of the provided Ant build scripts.
 4. Move ``VisualJ.jar`` to ``BlueJ\lib\userlib``.
 5. Move ``VisualJPlugin.jar`` to ``BlueJ\lib\extensions``.
+
+VisualJ was developed for the PSE which is part of the Bachelor's degree program. It is a teamproject, in which the students put theory into practice. 
+The following students have worked on this project:
+Mehdi Dado
+Florian Lanzinger
+Robin Schulz
+Tobias Stickling
+Erik Weinstock
