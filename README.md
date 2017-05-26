@@ -21,3 +21,6 @@ Florian Lanzinger
 Robin Schulz
 Tobias Stickling
 Erik Weinstock
+
+A short presentation of the most important functions can be found here: https://youtu.be/xrSHnGlFBK0
+The presentation was held in german.
