@@ -1,6 +1,12 @@
 # VisualJ: VisualJ
 A Java library and BlueJ extension to visualize the program flow and changing of data structures of simple algorithms, as well as their time complexity.
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Project%20functional-true-brightgreen.svg">
+	 <img src="https://img.shields.io/badge/Language-Java-blue.svg">
+	 <img src="https://img.shields.io/badge/Priority-closed-brightgreen.svg">
+</p>
+
 To get this running:
 
 1. Run ``git clone https://gitlab.com/VisualJ/VisualJ.git``.
